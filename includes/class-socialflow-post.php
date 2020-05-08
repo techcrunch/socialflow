@@ -133,7 +133,9 @@ class SocialFlow_Post {
 				continue;
 			}
 
-			add_meta_box( 'socialflow', __( 'SocialFlow', 'socialflow' ), array( $this, 'meta_box' ), $type, 'side', 'high', array( 'post_page' => true ) );
+			/** TC Edit - Fixed escaping. */
+			// add_meta_box( 'socialflow', __( 'SocialFlow', 'socialflow' ), array( $this, 'meta_box' ), $type, 'side', 'high', array( 'post_page' => true ) );
+			add_meta_box( 'socialflow', esc_html__( 'SocialFlow', 'socialflow' ), array( $this, 'meta_box' ), $type, 'side', 'high', array( 'post_page' => true ) );
 		}
 	}
 
@@ -301,8 +303,11 @@ class SocialFlow_Post {
 		$media             = $socialflow_params['socialflow']['global']['media'];
 		$this->data( $post_id )->save_global_settings( $data );
 		$this->data( $post_id )->save_social_messages( $data );
+		/** TC Edit - Fix bug with "Image" not able to be unchecked once saved as checked. */
+		$this->data( $post_id )->save_social_compose_media( $media );
 		if ( $media ) {
-			$this->data( $post_id )->save_social_compose_media( $media );
+			/** TC Edit - Fix bug with "Image" not able to be unchecked once saved as checked. */
+			//$this->data( $post_id )->save_social_compose_media( $media );
 			if ( strlen( $media['compose_media_pos_twitter'] ) ) {
 				$this->data( $post_id )->save_media_slider_position( (int) $media['compose_media_pos_twitter'], 'twitter' );
 				$this->save_curent_url_for_social( $post_id, 'twitter', $media['compose_media_url_twitter'] );
@@ -408,6 +413,8 @@ class SocialFlow_Post {
 						'is_compose_media_facebook'    => $is_compose_media_facebook,
 						'is_compose_media_google_plus' => $is_compose_media_google_plus,
 						'media'                        => $media,
+						/** TC Edit - Pass the post_id to the compose class so that we know what post we're working with. */
+						'post_id'                      => $post_id,
 					)
 				);
 
@@ -778,7 +785,9 @@ class SocialFlow_Post {
 			$form_message = '<p class="sf-error">' . $form_message . '</p>';
 		} else {
 			$status       = 1;
-			$form_message = '<p class="success">' . __( 'Message was successfully sent. View statistics block for more information.', 'socialflow' ) . '</p>';
+			/** TC Edit - Fixed escaping. */
+			// $form_message = '<p class="success">' . __( 'Message was successfully sent. View statistics block for more information.', 'socialflow' ) . '</p>';
+			$form_message = '<p class="success">' . esc_html__( 'Message was successfully sent. View statistics block for more information.', 'socialflow' ) . '</p>';
 		}
 
 		wp_send_json(
@@ -829,7 +838,9 @@ class SocialFlow_Post {
 			$status = $compose_log['status'];
 
 			if ( $compose_log['is_deleted'] ) {
-				$status .= ' <i class="deleted">' . __( 'deleted', 'socialflow' ) . '</i>';
+				/** TC Edit - Fixed escaping. */
+				// $status .= ' <i class="deleted">' . __( 'deleted', 'socialflow' ) . '</i>';
+				$status .= ' <i class="deleted">' . esc_html__( 'deleted', 'socialflow' ) . '</i>';
 			}
 
 			$is_updated = $logs->update_by_content_item_id(
@@ -841,7 +852,9 @@ class SocialFlow_Post {
 
 			if ( $is_updated ) {
 				$status .= ' &rarr; <span style="display:inline-block">';
-				$status .= ( 0 === $compose_log['is_published'] ) ? __( 'In Queue', 'socialflow' ) : __( 'Published', 'socialflow' );
+				/** TC Edit - Fixed escaping. */
+				// $status .= ( 0 === $compose_log['is_published'] ) ? __( 'In Queue', 'socialflow' ) : __( 'Published', 'socialflow' );
+				$status .= ( 0 === $compose_log['is_published'] ) ? esc_html__( 'In Queue', 'socialflow' ) : esc_html__( 'Published', 'socialflow' );
 				$status .= '</span>';
 			}
 		}
@@ -915,7 +928,9 @@ class SocialFlow_Post {
 	 * @return array of filtered list columns.
 	 */
 	public function add_column( $columns ) {
-		$columns['socialflow'] = __( 'SocialFlow', 'socialflow' );
+		/** TC Edit - Fixed escaping. */
+		// $columns['socialflow'] = __( 'SocialFlow', 'socialflow' );
+		$columns['socialflow'] = esc_html__( 'SocialFlow', 'socialflow' );
 		return $columns;
 	}
 
@@ -936,12 +951,16 @@ class SocialFlow_Post {
 		if ( 'socialflow' === $column ) {
 			// if sf_compose == 0 than message was already composed.
 			if ( $this->data( $post_id )->logs()->get() ) {
-				echo wp_kses_post( '<img class="js-sf-extended-stat-toggler" src="' . plugins_url( 'assets/images/success.gif', SF_FILE ) . '" width="12" height="12" title="' . __( 'Successfully sent', 'socialflow' ) . '" alt="' . __( 'Successfully sent', 'socialflow' ) . '" />' );
+				/** TC Edit - Fixed escaping. */
+				// echo wp_kses_post( '<img class="js-sf-extended-stat-toggler" src="' . plugins_url( 'assets/images/success.gif', SF_FILE ) . '" width="12" height="12" title="' . __( 'Successfully sent', 'socialflow' ) . '" alt="' . __( 'Successfully sent', 'socialflow' ) . '" />' );
+				echo wp_kses_post( '<img class="js-sf-extended-stat-toggler" src="' . plugins_url( 'assets/images/success.gif', SF_FILE ) . '" width="12" height="12" title="' . esc_attr__( 'Successfully sent', 'socialflow' ) . '" alt="' . esc_attr__( 'Successfully sent', 'socialflow' ) . '" />' );
 
 				// Render compact stats table.
 				$socialflow->render_view( 'stats/compact', $this->get_view_stat_data( $post_id ) );
 			} elseif ( 'publish' !== get_post_status( $post_id ) && ( get_post_meta( $post_id, 'sf_message_facebook', true ) || get_post_meta( $post_id, 'sf_message_twitter', true ) ) ) {
-				echo wp_kses_post( '<img src="' . plugins_url( 'assets/images/notice.gif', SF_FILE ) . '" width="12" height="12" title="' . __( 'SocialFlow data filled', 'socialflow' ) . '" alt="' . __( 'SocialFlow data filled', 'socialflow' ) . '" />' );
+				/** TC Edit - Fixed escaping. */
+				// echo wp_kses_post( '<img src="' . plugins_url( 'assets/images/notice.gif', SF_FILE ) . '" width="12" height="12" title="' . __( 'SocialFlow data filled', 'socialflow' ) . '" alt="' . __( 'SocialFlow data filled', 'socialflow' ) . '" />' );
+				echo wp_kses_post( '<img src="' . plugins_url( 'assets/images/notice.gif', SF_FILE ) . '" width="12" height="12" title="' . esc_attr__( 'SocialFlow data filled', 'socialflow' ) . '" alt="' . esc_attr__( 'SocialFlow data filled', 'socialflow' ) . '" />' );
 			} else {
 				echo wp_kses_post( '<img src="' . plugins_url( 'assets/images/default.gif', SF_FILE ) . '" width="12" height="12" />' );
 			}
@@ -964,9 +983,13 @@ class SocialFlow_Post {
 			return $actions;
 		}
 
-		$title = esc_attr__( 'Send to SocialFlow', 'socialflow' );
+		/** TC Edit - Fixed escaping. */
+		// $title = esc_attr__( 'Send to SocialFlow', 'socialflow' );
+		$title_attr = esc_attr__( 'Send to SocialFlow', 'socialflow' );
+		$title      = esc_html__( 'Send to SocialFlow', 'socialflow' );
 
-		$actions['sf-compose-action'] = '<a class="thickbox sf-open-popup" href="#TB_inline?width=770&inlineId=sf-form-popup" data-post-id="' . $post->ID . '" title="' . $title . '">' . $title . '</a>';
+		// $actions['sf-compose-action'] = '<a class="thickbox sf-open-popup" href="#TB_inline?width=770&inlineId=sf-form-popup" data-post-id="' . $post->ID . '" title="' . $title . '">' . $title . '</a>';
+		$actions['sf-compose-action'] = '<a class="thickbox sf-open-popup" href="#TB_inline?width=770&inlineId=sf-form-popup" data-post-id="' . (int) $post->ID . '" title="' . $title_attr . '">' . $title . '</a>';
 
 		return $actions;
 	}
@@ -1006,7 +1029,9 @@ class SocialFlow_Post {
 		// Add message only for enabled post types.
 		if ( $socialflow->options->get( 'post_type' ) ) {
 			foreach ( $socialflow->options->get( 'post_type' ) as $type ) {
-				$mess                  = '<b>Notice:</b> ' . $type . ' was not published, because some errors occurred when sending messages to SocialFlow. <a href="#socialflow">View More.</a>';
+				/** TC Edit - Fixed escaping. */
+				// $mess                  = '<b>Notice:</b> ' . $type . ' was not published, because some errors occurred when sending messages to SocialFlow. <a href="#socialflow">View More.</a>';
+				$mess                  = '<b>Notice:</b> ' . esc_html( $type ) . ' was not published, because some errors occurred when sending messages to SocialFlow. <a href="#socialflow">View More.</a>';
 				$messages[ $type ][20] = $mess;
 			}
 		}

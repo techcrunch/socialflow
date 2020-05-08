@@ -173,7 +173,8 @@ class SocialFlow_Admin_Settings_Messages extends SocialFlow_Admin_Settings_Page 
 		if ( isset( $socialflow_params['sf_action'] ) && ( 'delete' === $socialflow_params['sf_action'] ) && current_user_can( 'manage_options' ) ) {
 			require_once SF_ABSPATH . '/libs/class-wp-socialflow.php';
 			$token = $socialflow->options->get( 'access_token' );
-			$api   = new WP_SocialFlow( SF_KEY, SF_SECRET, $token['oauth_token'], $token['oauth_token_secret'] );
+			/** TC Edit - We're loading our own key/secret via filter rather than use SF_KEY / SF_SECRET. */
+			$api   = new WP_SocialFlow( apply_filters( 'tc_sf_key', '' ), apply_filters( 'tc_sf_secret', '' ), $token['oauth_token'], $token['oauth_token_secret'] );
 
 			// check for required vars and remove message from queue.
 			$result = false;

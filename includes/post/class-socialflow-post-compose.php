@@ -42,6 +42,8 @@ class SocialFlow_Post_Compose {
 		'is_compose_media_google_plus' => false,
 		'media'                        => array(),
 		'shorten_links'                => false,
+		/** TC Edit - Pass the post_id in so that we know what post we're working with. */
+		'post_id'                      => 0,
 	);
 
 	/**
@@ -543,12 +545,36 @@ class SocialFlow_Post_Compose {
 			return;
 		}
 
-		if ( $this->is_compose_socials_networks() && ( ! $this->is_post_attachment() ) ) {
-			$message .= " {$this->post_permalink}";
+		/** TC Edit - Submit twitter postfix even with image posts. */
+		if ( ! $this->is_social_type( 'twitter' ) && $this->is_compose_socials_networks() && ( ! $this->is_post_attachment() ) ) {
+//		if ( $this->is_compose_socials_networks() && ( ! $this->is_post_attachment() ) ) {
+
+			/** TC Edit - Allow overriding the permalink to include a tracking param. */
+			//$message .= " {$this->post_permalink}";
+			/**
+			 * Filters the post permalink that's used for the share to allow injecting tracking params.
+			 *
+			 * @param string $permalink   The post permalink.
+			 * @param int    $post_id     The ID of the post this permalink is for.
+			 * @param string $social_type The social network this permalink will be used with.
+			 */
+			$message .= ' ' . apply_filters( 'tc_sf_post_permalink', $this->post_permalink, $this->post_id, $this->social_type );
 		} elseif ( $this->is_social_type( 'twitter' ) ) {
-			$message .= " {$this->post_permalink}";
+			/** TC Edit - Allow overriding the permalink to include a tracking param. */
+			//$message .= " {$this->post_permalink}";
+			$message .= ' ' . apply_filters( 'tc_sf_post_permalink', $this->post_permalink, $this->post_id, $this->social_type );
 			if ( $this->fields['message_postfix'] ) {
 				$message .= " {$this->fields['message_postfix']}";
+			}
+			/** TC Edit - Allow overriding the Twitter postfix if nothing is submitted. */
+			/**
+			 * Filters the custom twitter postfix we want to set.
+			 *
+			 * @param string $postfix The string to print after the URL on twitter posts.
+			 * @param int    $post_id The ID of the post this postfix is for.
+			 */
+			elseif ( apply_filters( 'tc_sf_twitter_postfix', '', $this->post_id ) ) {
+				$message .= ' ' . apply_filters( 'tc_sf_twitter_postfix', '', $this->post_id );
 			}
 		}
 
@@ -717,7 +743,9 @@ class SocialFlow_Post_Compose {
 				$error = array(
 					'code'    => 'empty_message:',
 					/* translators: %s: search term */
-					'message' => printf( esc_html( __( '<b>Error:</b> Publish options are required for: <i>%s</i>.' ) ) ),
+					/** TC Edit - Fixed escaping. */
+					// 'message' => printf( esc_html( __( '<b>Error:</b> Publish options are required for: <i>%s</i>.' ) ) ),
+					'message' => __( '<b>Error:</b> Publish options are required for: <i>%s</i>.' ),
 					'data'    => $this->social_type,
 				);
 				break;

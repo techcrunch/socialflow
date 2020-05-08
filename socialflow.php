@@ -65,14 +65,23 @@ if ( ! defined( 'SF_DIRNAME' ) ) {
  *
  * @since 1.0
  */
-define( 'SF_KEY', 'acbe74e2cc182d888412' );
+/** TC Edit - We're using our encrypted saved key/secret, rather than hard-coding
+define( 'SF_KEY', '' );
+*/
+
 /**
  * Define Consumer Secret
  *
  * @since 1.0
  */
-define( 'SF_SECRET', '650108a50ea3cb2bd6f9' );
-require_once SF_ABSPATH . '/includes/class-sf-debug.php';
+/** TC Edit - We're using our encrypted saved key/secret, rather than hard-coding
+define( 'SF_SECRET', '' );
+*/
+
+/** TC Edit - Load in our custom VIP-safe debug class. */
+// require_once SF_ABSPATH . '/includes/class-sf-debug.php';
+require_once SF_ABSPATH . '/includes/class-tc-sf-debug.php';
+
 require_once SF_ABSPATH . '/includes/class-socialflow-methods.php';
 require_once SF_ABSPATH . '/includes/class-socialflow.php';
 require_once SF_ABSPATH . '/includes/class-socialflow-admin.php';
