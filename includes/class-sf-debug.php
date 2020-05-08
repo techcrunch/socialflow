@@ -122,6 +122,16 @@ class SF_Debug {
 	 * @access public
 	 */
 	public function on_init() {
+		/** TC Edit - Only allow the 'Debug' setting if we're not on VIP. */
+		if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) && VIP_GO_APP_ENVIRONMENT !== false ) {
+			$this->debug = false;
+			return;
+		}
+
+		/** TC Edit - Fix "Debug mode" checkbox not actually enabling/disabling debug mode. */
+		global $socialflow;
+		$this->debug = $socialflow->options->get( 'debug_mode' );
+
 		if ( ! $this->debug ) {
 			return;
 		}

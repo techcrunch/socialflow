@@ -328,7 +328,8 @@ class SocialFlow_Admin_Settings_General extends SocialFlow_Admin_Settings_Page {
 		}
 
 		$signup = 'http://socialflow.com/signup';
-		$links  = $api->get_account_links( SF_KEY );
+		/** TC Edit - We're loading our own key/secret via filter rather than use SF_KEY. */
+		$links  = $api->get_account_links( apply_filters( 'tc_sf_key', '' ) );
 		if ( $links ) {
 			$signup = $links->signup;
 		}
@@ -393,6 +394,9 @@ class SocialFlow_Admin_Settings_General extends SocialFlow_Admin_Settings_Page {
 			$settings['must_send']                   = isset( $data['must_send'] ) ? absint( $data['must_send'] ) : 0;
 			$settings['compose_now']                 = isset( $data['compose_now'] ) ? absint( $data['compose_now'] ) : 0;
 			$settings['global_disable_autocomplete'] = isset( $data['global_disable_autocomplete'] ) ? absint( $data['global_disable_autocomplete'] ) : 0;
+
+			/** TC Edit - Fix "Debug mode" checkbox not saving when unchecked. */
+			$settings['debug_mode'] = isset( $data['debug_mode'] ) ? absint( $data['debug_mode'] ) : 0;
 		}
 
 		return $settings;

@@ -6,6 +6,9 @@
  * @package SocialFlow
  */
 
+/** TC Edit - We need to check if we're on our local env. */
+use function TC\Utilities\Environments\is_local;
+
 /**
  * Plugin Methods class
  *
@@ -55,7 +58,8 @@ class SocialFlow_Methods {
 			}
 
 			// Catch error.
-			$socialflow->api = new WP_SocialFlow( SF_KEY, SF_SECRET, $token, $secret );
+			/** TC Edit - We're loading our own key/secret via filter rather than use SF_KEY / SF_SECRET. */
+			$socialflow->api = new WP_SocialFlow( apply_filters( 'tc_sf_key', '' ), apply_filters( 'tc_sf_secret', '' ), $token, $secret );
 		}
 
 		return $socialflow->api;
@@ -504,7 +508,9 @@ class SocialFlow_Methods {
 		// search for image id.
 		$id = wp_cache_get( $url );
 		if ( ! $id ) {
-			$id = $wpdb->get_var( $wpdb->prepare( "SELECT ID $wpdb->posts FROM  WHERE guid LIKE %d LIMIT 1", [ "%$url%" ] ) );
+			/** TC Edit - Fixed broken SQL statement. */
+			// $id = $wpdb->get_var( $wpdb->prepare( "SELECT ID $wpdb->posts FROM  WHERE guid LIKE %d LIMIT 1", [ "%$url%" ] ) );
+			$id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE guid LIKE %d LIMIT 1", [ "%$url%" ] ) );
 			wp_cache_set( $url, $id );
 		}
 
@@ -525,7 +531,8 @@ class SocialFlow_Methods {
 	 */
 	public function is_localhost() {
 		$socialflow_params = filter_input_array( INPUT_SERVER );
-		if ( 'localhost' === $socialflow_params['HTTP_HOST'] ) {
+		/** TC Edit - We need to check if we're on our local env. */
+		if ( is_local() || 'localhost' === $socialflow_params['HTTP_HOST'] ) {
 			return true;
 		}
 

@@ -628,10 +628,19 @@ class SocialFlow_Post_Form_Data {
 	 * @param array $data .
 	 */
 	public function save_social_compose_media( $data ) {
-
-		foreach ( $data as $key => $item ) {
-			update_post_meta( $this->post->ID, 'sf_' . $key, $item );
+		/** TC Edit - Fix bug with "Image" not able to be unchecked once saved as checked. */
+		$networks = [ 'twitter', 'facebook', 'google_plus', 'linkedin' ];
+		foreach ( $networks as $network ) {
+			$key = "compose_media_{$network}";
+			if ( is_array( $data ) && array_key_exists( $key, $data ) ) {
+				update_post_meta( $this->post->ID, 'sf_' . $key, $data[ $key ] );
+			} else {
+				update_post_meta( $this->post->ID, 'sf_' . $key, 0 );
+			}
 		}
+		//foreach ( $data as $key => $item ) {
+		//	update_post_meta( $this->post->ID, 'sf_' . $key, $item );
+		//}
 
 	}
 	/**
